@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+xmlns:app="http://schemas.android.com/apk/res-auto"
+xmlns:tools="http://schemas.android.com/tools"
+android:layout_width="match_parent"
+android:layout_height="match_parent"
+android:background="@drawable/background">
+
+<EditText
+    android:id="@+id/editTextEuro"
+    android:layout_width="139dp"
+    android:layout_height="61dp"
+    android:ems="10"
+    android:inputType="textPersonName"
+    android:textAlignment="center"
+    android:textColor="@color/textColor"
+    app:layout_constraintBottom_toBottomOf="parent"
+    app:layout_constraintEnd_toEndOf="parent"
+    app:layout_constraintHorizontal_bias="0.088"
+    app:layout_constraintStart_toStartOf="parent"
+    app:layout_constraintTop_toTopOf="parent" />
+
+<EditText
+    android:id="@+id/editTextDolares"
+    android:layout_width="139dp"
+    android:layout_height="61dp"
+    android:ems="10"
+    android:enabled="false"
+    android:inputType="textPersonName"
+    android:textAlignment="center"
+    android:textColor="@color/black"
+    app:layout_constraintBottom_toBottomOf="parent"
+    app:layout_constraintEnd_toEndOf="parent"
+    app:layout_constraintHorizontal_bias="0.882"
+    app:layout_constraintStart_toStartOf="parent"
+    app:layout_constraintTop_toTopOf="parent" />
+
+<TextView
+    android:id="@+id/textViewEuro"
+    android:layout_width="136dp"
+    android:layout_height="39dp"
+    android:text="EURO"
+    android:textAlignment="center"
+    android:textColor="@color/black"
+    android:textSize="30sp"
+    app:layout_constraintBottom_toTopOf="@+id/editTextEuro"
+    app:layout_constraintEnd_toStartOf="@+id/switchMoneda"
+    app:layout_constraintStart_toStartOf="parent"
+    app:layout_constraintTop_toBottomOf="@+id/textViewTitulo"
+    app:layout_constraintVertical_bias="0.666" />
+
+<TextView
+    android:id="@+id/textViewDolares"
+    android:layout_width="136dp"
+    android:layout_height="39dp"
+    android:text="DOLAR"
+    android:textAlignment="center"
+    android:textColor="@color/black"
+    android:textSize="30sp"
+    app:layout_constraintBottom_toBottomOf="parent"
+    app:layout_constraintEnd_toEndOf="parent"
+    app:layout_constraintHorizontal_bias="0.325"
+    app:layout_constraintStart_toEndOf="@+id/switchMoneda"
+    app:layout_constraintTop_toBottomOf="@+id/textViewTitulo"
+    app:layout_constraintVertical_bias="0.214" />
+
+<Switch
+    android:id="@+id/switchMoneda"
+    android:layout_width="43dp"
+    android:layout_height="37dp"
+    android:textAlignment="center"
+    app:layout_constraintBottom_toBottomOf="parent"
+    app:layout_constraintEnd_toEndOf="parent"
+    app:layout_constraintStart_toStartOf="parent"
+    app:layout_constraintTop_toBottomOf="@+id/textViewTitulo"
+    app:layout_constraintVertical_bias="0.213" />
+
+<TextView
+    android:id="@+id/textViewTitulo"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:text="CONVERSOR"
+    android:textColor="@color/black"
+    android:textSize="36sp"
+    android:textStyle="bold|italic"
+    app:layout_constraintBottom_toBottomOf="parent"
+    app:layout_constraintEnd_toEndOf="parent"
+    app:layout_constraintHorizontal_bias="0.492"
+    app:layout_constraintStart_toStartOf="parent"
+    app:layout_constraintTop_toTopOf="parent"
+    app:layout_constraintVertical_bias="0.089" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>
