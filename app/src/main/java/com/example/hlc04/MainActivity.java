@@ -2,8 +2,11 @@ package com.example.hlc04;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.BroadcastReceiver;
 import android.content.ComponentName;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.text.Editable;
@@ -18,10 +21,16 @@ import java.text.DecimalFormat;
 
 public class MainActivity extends AppCompatActivity {
     static final String URL = "https://dam.org.es/ficheros/cambio.txt";
+    public static final String ACTION_RESP = "RESPUESTA_DESCARGA";
+
     double dolarValue;
     private TextWatcher tv1;
     private TextWatcher tv2;
     ActivityMainBinding binding;
+
+    IntentFilter intentFilter;
+    BroadcastReceiver broadcastReceiver;
+
     DecimalFormat df = new DecimalFormat("#.00");
 
     @Override
@@ -31,6 +40,9 @@ public class MainActivity extends AppCompatActivity {
         View view = binding.getRoot();
         setContentView(view);
 
+        intentFilter = new IntentFilter(ACTION_RESP);
+        intentFilter.addCategory(Intent.CATEGORY_DEFAULT);
+        broadcastReceiver = new ReceptorOperacion();
 
         System.out.println("ASDASDASDASDASDASDASD11111111111111111111111111" + getDolarValue());
         startService(new Intent(MainActivity.this, DownloadService.class));
@@ -55,9 +67,24 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         });
+
         comprobarDolarAEuro();
         comprobarEuroADolar();
         binding.editTextEuro.addTextChangedListener(tv1);
+    }
+
+    @Override
+    public void onResume(){
+        super.onResume();
+        //---registrar el receptor ---
+        registerReceiver(broadcastReceiver, intentFilter);
+    }
+
+    @Override
+    public void onPause(){
+        super.onPause();
+        //--- anular el registro del recpetor ---
+        unregisterReceiver(broadcastReceiver);
     }
 
     public void limpiarCampos() {
@@ -125,7 +152,8 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public double getDolarValue() {
-        return dolarValue;
+        setDolarValue("0,84");
+        return this.dolarValue;
     }
 
     public void setDolarValue(String dolarValue) {
@@ -144,5 +172,19 @@ public class MainActivity extends AppCompatActivity {
         System.out.println("NGE: " + this.dolarValue);
         System.out.println("NGE: " + this.dolarValue);
         System.out.println("NGE: " + this.dolarValue);
+    }
+
+    private void mostrarMensaje(String mensaje) {
+        Toast.makeText(this, mensaje, Toast.LENGTH_SHORT).show();
+    }
+
+
+    public class ReceptorOperacion extends BroadcastReceiver {
+        MainActivity mainActivity;
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            String respuesta = intent.getStringExtra("resultado");
+            mainActivity.mostrarMensaje(respuesta);
+        }
     }
 }
