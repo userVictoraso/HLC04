@@ -2,6 +2,7 @@ package com.example.hlc04;
 
 import android.app.Service;
 import android.content.Intent;
+import android.os.Environment;
 import android.os.IBinder;
 import android.util.Log;
 import android.widget.Toast;
@@ -10,6 +11,9 @@ import androidx.annotation.Nullable;
 
 import org.jetbrains.annotations.NotNull;
 
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -19,46 +23,49 @@ import okhttp3.Callback;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
+import okhttp3.ResponseBody;
 
 public class DownloadService extends Service {
-    final String COIN_REPOSITORY = "https://dam.org.es/ficheros/cambio.txt";
-    public double dolarValue;
+    MainActivity mainActivity = new MainActivity();
 
-    public DownloadService(){}
+    public DownloadService() {
+    }
 
     @Override
     public void onCreate() {
         super.onCreate();
-        mostrarMensaje("Iniciando servicio");
     }
 
-    public int onStartCommand(Intent intent, int flags, int startID) {
+    @Override
+    public int onStartCommand(Intent intent, int flags, int startId) {
+        mostrarMensaje("Creando el servicio . . .");
         URL url = null;
         try {
-            url = new URL(COIN_REPOSITORY);
+            url = new URL(MainActivity.URL);
             descargaOkHTTP(url);
         } catch (MalformedURLException e) {
             e.printStackTrace();
-            mostrarMensaje("Error en la URL");
+            mostrarMensaje("Error en la URL: " + MainActivity.URL);
         }
-        return super.onStartCommand(intent, flags, startID);
+
+        return super.onStartCommand(intent, flags, startId);
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
-        mostrarMensaje("Finalizando servicio");
+        mostrarMensaje("Servicio destruido");
     }
 
-    @Nullable
     @Override
     public IBinder onBind(Intent intent) {
+        // TODO: Return the communication channel to the service.
         throw new UnsupportedOperationException("Not yet implemented");
     }
 
     private void descargaOkHTTP(URL web) {
         OkHttpClient client = new OkHttpClient();
-        Request request = new Request.Builder().url(COIN_REPOSITORY).build();
+        Request request = new Request.Builder().url(web).build();
 
         client.newCall(request).enqueue(new Callback() {
             @Override
@@ -68,30 +75,17 @@ public class DownloadService extends Service {
 
             @Override
             public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
-                if (response.isSuccessful()) {
-                    String myResponse = response.body().string();
-                    String myResponseFixed = myResponse.replaceAll(",", ".");
-                    new Runnable() {
-                        @Override
-                        public void run() {
-                            try {
-                                dolarValue = Double.parseDouble(myResponseFixed);
-                            } catch (NumberFormatException n){
-                                n.printStackTrace();
-                            }
-                        }
-                    };
+                try (ResponseBody responseBody = response.body()) {
+                    if (response.isSuccessful()) {
+                        String myResponse = response.body().string();
+                        mainActivity.setDolarValue(myResponse);
+                    }
                 }
             }
         });
     }
 
     private void mostrarMensaje(String mensaje) {
-        Toast.makeText(this,mensaje, Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, mensaje, Toast.LENGTH_SHORT).show();
     }
-
-    public double getValue(){
-        return dolarValue;
-    }
-
 }

@@ -13,9 +13,11 @@ import android.widget.CompoundButton;
 import android.widget.Toast;
 
 import com.example.hlc04.databinding.ActivityMainBinding;
+
 import java.text.DecimalFormat;
 
 public class MainActivity extends AppCompatActivity {
+    static final String URL = "https://dam.org.es/ficheros/cambio.txt";
     double dolarValue;
     private TextWatcher tv1;
     private TextWatcher tv2;
@@ -29,6 +31,12 @@ public class MainActivity extends AppCompatActivity {
         View view = binding.getRoot();
         setContentView(view);
 
+
+        System.out.println("ASDASDASDASDASDASDASD11111111111111111111111111" + getDolarValue());
+        startService(new Intent(MainActivity.this, DownloadService.class));
+        System.out.println("ASDASDASDASDASDASDASD22222222222222222222222222" + getDolarValue());
+
+        //TODO: Arreglar el seteo.
         //TODO: Utilizar un servicio para descargar el fichero continuamente cada 5 minutos.
         //TODO: Modificar la aplicación Conversor de moneda para que lance el servicio al iniciarse y finalice el servicio al terminar.
         //TODO: Receptor de anuncios para mostrar una notificación en pantalla con el valor del cambio cada vez que se descarga el archivo.
@@ -50,12 +58,6 @@ public class MainActivity extends AppCompatActivity {
         comprobarDolarAEuro();
         comprobarEuroADolar();
         binding.editTextEuro.addTextChangedListener(tv1);
-    }
-
-    public void startService() {
-        startService(new Intent(this, DownloadService.class));
-        Toast.makeText(getBaseContext(), "Valor actualizado",
-                Toast.LENGTH_SHORT).show();
     }
 
     public void limpiarCampos() {
@@ -83,7 +85,7 @@ public class MainActivity extends AppCompatActivity {
                     if (binding.editTextEuro.toString().length() < 1) {
                         limpiarCampos();
                     }
-                    double resultado = Double.valueOf(binding.editTextEuro.getText().toString()) * dolarValue;
+                    double resultado = Double.valueOf(binding.editTextEuro.getText().toString()) * getDolarValue();
                     System.out.println(resultado);
                     binding.editTextDolares.removeTextChangedListener(tv2);
                     binding.editTextDolares.setText(String.valueOf(df.format(resultado)) + " $");
@@ -111,7 +113,7 @@ public class MainActivity extends AppCompatActivity {
                     if (binding.editTextDolares.toString().length() == 0) {
                         limpiarCampos();
                     }
-                    double resultado = Double.valueOf(binding.editTextDolares.getText().toString()) / dolarValue;
+                    double resultado = Double.valueOf(binding.editTextDolares.getText().toString()) / getDolarValue();
                     binding.editTextEuro.removeTextChangedListener(tv1);
                     binding.editTextEuro.setText(String.valueOf(df.format(resultado)) + " €");
                     binding.editTextEuro.addTextChangedListener(tv1);
@@ -120,5 +122,27 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         };
+    }
+
+    public double getDolarValue() {
+        return dolarValue;
+    }
+
+    public void setDolarValue(String dolarValue) {
+        System.out.println("NGÁ: " + dolarValue);
+        System.out.println("NGÁ: " + dolarValue);
+        System.out.println("NGÁ: " + dolarValue);
+        System.out.println("NGÁ: " + dolarValue);
+        System.out.println("NGÁ: " + dolarValue);
+        System.out.println("NGÁ: " + dolarValue);
+        System.out.println("NGÁ: " + dolarValue);
+
+        String stringToDouble = dolarValue.replaceAll(",", ".");
+        this.dolarValue = Double.parseDouble(stringToDouble);
+        System.out.println("NGE: " + this.dolarValue);
+        System.out.println("NGE: " + this.dolarValue);
+        System.out.println("NGE: " + this.dolarValue);
+        System.out.println("NGE: " + this.dolarValue);
+        System.out.println("NGE: " + this.dolarValue);
     }
 }
