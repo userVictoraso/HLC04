@@ -1,14 +1,13 @@
 package com.example.hlc04;
 
 import androidx.appcompat.app.AppCompatActivity;
-
 import android.content.BroadcastReceiver;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.media.MediaPlayer;
 import android.os.Bundle;
-import android.os.CountDownTimer;
+import android.os.Handler;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.View;
@@ -18,16 +17,22 @@ import android.widget.Toast;
 import com.example.hlc04.databinding.ActivityMainBinding;
 
 import java.text.DecimalFormat;
+import java.util.Timer;
+import java.util.TimerTask;
 
 public class MainActivity extends AppCompatActivity {
+    private final long time = 60000 * 5;
     static final String URL = "https://dam.org.es/ficheros/cambio.txt";
     public static final String ACTION_RESP = "RESPUESTA_DESCARGA";
 
-    double dolarValue;
+    final Handler handler = new Handler();
+
+    double dolarValue = 0.87; //Valor asignado por defecto.
     private TextWatcher tv1;
     private TextWatcher tv2;
     ActivityMainBinding binding;
 
+    Intent intent;
     IntentFilter intentFilter;
     BroadcastReceiver broadcastReceiver;
 
@@ -39,19 +44,35 @@ public class MainActivity extends AppCompatActivity {
         binding = ActivityMainBinding.inflate(getLayoutInflater());
         View view = binding.getRoot();
         setContentView(view);
+        MediaPlayer mediaPlayer = MediaPlayer.create(this, R.raw.popsound);
 
         intentFilter = new IntentFilter(ACTION_RESP);
         intentFilter.addCategory(Intent.CATEGORY_DEFAULT);
         broadcastReceiver = new ReceptorOperacion();
 
-        System.out.println("ASDASDASDASDASDASDASD11111111111111111111111111" + getDolarValue());
-        startService(new Intent(MainActivity.this, DownloadService.class));
-        System.out.println("ASDASDASDASDASDASDASD22222222222222222222222222" + getDolarValue());
+        //LANZAR EL SERVICIO AL INICIAR LA APP
+        intent = new Intent(MainActivity.this, DownloadService.class);
+        startService(intent);
 
-        //TODO: Arreglar el seteo.
-        //TODO: Utilizar un servicio para descargar el fichero continuamente cada 5 minutos.
-        //TODO: Modificar la aplicación Conversor de moneda para que lance el servicio al iniciarse y finalice el servicio al terminar.
-        //TODO: Receptor de anuncios para mostrar una notificación en pantalla con el valor del cambio cada vez que se descarga el archivo.
+        /**LANZAR SERVICIO CADA 5 MINUTOS*/
+        TimerTask timerTask = new TimerTask() {
+            @Override
+            public void run() {
+                handler.postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        mostrarMensaje("Lanzando el servicio de nuevo");
+                        startService(intent);
+                        mediaPlayer.start(); //EMITE UN SONIDO CUANDO LANZA EL SERVICIO
+                    }
+                }, time);
+            }
+        };
+        Timer timer = new Timer();
+        timer.schedule(timerTask, 0, time);
+
+        //TODO: Utilizar un servicio para descargar el fichero continuamente cada 5 minutos y mostrar el mensaje en el Broadcast.
+
 
         binding.switchMoneda.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
@@ -73,18 +94,24 @@ public class MainActivity extends AppCompatActivity {
         binding.editTextEuro.addTextChangedListener(tv1);
     }
 
+
     @Override
-    public void onResume(){
+    public void onResume() {
         super.onResume();
-        //---registrar el receptor ---
         registerReceiver(broadcastReceiver, intentFilter);
     }
 
     @Override
-    public void onPause(){
+    public void onPause() {
         super.onPause();
-        //--- anular el registro del recpetor ---
         unregisterReceiver(broadcastReceiver);
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        mostrarMensaje("Servicio parado");
+        stopService(intent);
     }
 
     public void limpiarCampos() {
@@ -113,7 +140,6 @@ public class MainActivity extends AppCompatActivity {
                         limpiarCampos();
                     }
                     double resultado = Double.valueOf(binding.editTextEuro.getText().toString()) * getDolarValue();
-                    System.out.println(resultado);
                     binding.editTextDolares.removeTextChangedListener(tv2);
                     binding.editTextDolares.setText(String.valueOf(df.format(resultado)) + " $");
                     binding.editTextDolares.addTextChangedListener(tv2);
@@ -152,39 +178,24 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public double getDolarValue() {
-        setDolarValue("0,84");
         return this.dolarValue;
     }
 
-    public void setDolarValue(String dolarValue) {
-        System.out.println("NGÁ: " + dolarValue);
-        System.out.println("NGÁ: " + dolarValue);
-        System.out.println("NGÁ: " + dolarValue);
-        System.out.println("NGÁ: " + dolarValue);
-        System.out.println("NGÁ: " + dolarValue);
-        System.out.println("NGÁ: " + dolarValue);
-        System.out.println("NGÁ: " + dolarValue);
-
+    public void setDolarValueFromString(String dolarValue) {
         String stringToDouble = dolarValue.replaceAll(",", ".");
         this.dolarValue = Double.parseDouble(stringToDouble);
-        System.out.println("NGE: " + this.dolarValue);
-        System.out.println("NGE: " + this.dolarValue);
-        System.out.println("NGE: " + this.dolarValue);
-        System.out.println("NGE: " + this.dolarValue);
-        System.out.println("NGE: " + this.dolarValue);
     }
 
     private void mostrarMensaje(String mensaje) {
         Toast.makeText(this, mensaje, Toast.LENGTH_SHORT).show();
     }
 
-
     public class ReceptorOperacion extends BroadcastReceiver {
-        MainActivity mainActivity;
         @Override
         public void onReceive(Context context, Intent intent) {
             String respuesta = intent.getStringExtra("resultado");
-            mainActivity.mostrarMensaje(respuesta);
+            setDolarValueFromString(respuesta);
+            mostrarMensaje("Valor asignado: " + respuesta);
         }
     }
 }
